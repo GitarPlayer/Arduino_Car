@@ -15,7 +15,7 @@ bool sensorikRichtung = true;                // Momentane Drehrichtung des Servo
 byte sensorikPosition = 0;                   // Sensor-Position, 0 = rechts, 180 = links
 unsigned long sensorikVerzoegerung;          // Verzögerung für Schwenkung und Messung der Sensorik
 unsigned long gehirnVerzoegerung;
-
+unsigned long startTime;
 float sensorWert;                            // Momentaner Sensor-Wert
 float refSpannung = 4.96;                    // Korrektur für Sensor von 2A
 const float sensorMin = 512;                 // Sensor-Wert bei freiem Feld
@@ -86,12 +86,46 @@ void sensorikInfrarot() {
 //  Bewegungsfunktionen:
 //  --------------------
 
-void bewegungFahrt(bool richtungFahrt) {          // richtungFahrt: geradeaus = true; rückwärts = false, geschwindigkeit in Prozent
-
+void bewegungFahrt(bool richtungFahrt, int dauer) {          // richtungFahrt: geradeaus = true; rückwärts = false, dauer in Millisekunden
+  startTime=millis();
+  //// Vorwärts fahren
+  if (richtungFahrt) {               // 
+    if (millis() - startTime > dauer){
+      digitalWrite (N1, HIGH);
+      digitalWrite (N2, LOW);
+      digitalWrite (N3, HIGH);
+      digitalWrite (N4, LOW);    
+    }
+    // Rückwärts fahren
+  else {
+    if (millis() - startTime > dauer){
+      digitalWrite (N1, LOW);
+      digitalWrite (N2, HIGH);
+      digitalWrite (N3, LOW);
+      digitalWrite (N4, HIGH);
+    }
+  }
 }
 
-void bewegungKurve(bool richtungKurve, byte einschlagKurve) {            // richtungKurve: links = true, rechts = false; einschlag gibt die Kurvenstärke in Prozent an
-
+void bewegungKurve(bool richtungKurve, int dauer) {            // richtungKurve: links = true, rechts = false; dauer in Millisekunden
+  startTime=millis();
+  // Kurve links
+  if (richtungKurve) {               // 
+    if (millis() - startTime > dauer){
+      digitalWrite (N1, LOW);
+      digitalWrite (N2, HIGH);
+      digitalWrite (N3, HIGH);
+      digitalWrite (N4, LOW);    
+    }
+    // Kurve rechts
+  else {
+    if (millis() - startTime > dauer){
+      digitalWrite (N1, HIGH);
+      digitalWrite (N2, LOW);
+      digitalWrite (N3, LOW);
+      digitalWrite (N4, HIGH);  
+    }
+  }
 }
 
 void bewegungAntrieb(bool rad, bool drehrichtungAntrieb, byte geschwindigkeitAntrieb) {      // Subroutine - Grundlegender Antrieb eines Rads, rad: links = true, rechts = false; drehrichtungAntrieb: vorwärts = true, rückwärts = false; geschwindigkeitAntrieb in Prozent
