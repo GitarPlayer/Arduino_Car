@@ -86,8 +86,10 @@ void sensorikInfrarot() {
 //  Bewegungsfunktionen:
 //  --------------------
 
-void bewegungFahrt(bool richtungFahrt, int dauer) {          // richtungFahrt: geradeaus = true; rückwärts = false, dauer in Millisekunden
+void bewegungFahrt(bool richtungFahrt, int dauer,byte geschwindigkeit) {          // richtungFahrt: geradeaus = true; rückwärts = false, dauer in Millisekunden
   startTime=millis();
+  analogWrite(ENA, geschwindigkeit);        /* DEV */
+  analogWrite(ENB, geschwindigkeit);        /* DEV */ 
   //// Vorwärts fahren
   if (richtungFahrt) {               // 
     if (millis() - startTime > dauer){
@@ -108,8 +110,10 @@ void bewegungFahrt(bool richtungFahrt, int dauer) {          // richtungFahrt: g
   }
 }
 
-void bewegungKurve(bool richtungKurve, int dauer) {            // richtungKurve: links = true, rechts = false; dauer in Millisekunden
+void bewegungKurve(bool richtungKurve, int dauer,byte geschwindigkeit) {            // richtungKurve: links = true, rechts = false; dauer in Millisekunden
   startTime=millis();
+  analogWrite(ENA, geschwindigkeit);        /* DEV */
+  analogWrite(ENB, geschwindigkeit);        /* DEV */ 
   // Kurve links
   if (richtungKurve) {               // 
     if (millis() - startTime > dauer){
