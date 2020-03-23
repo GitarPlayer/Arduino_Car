@@ -15,17 +15,16 @@ bool sensorikRichtung = true;                // Momentane Drehrichtung des Servo
 byte sensorikPosition = 0;                   // Sensor-Position, 0 = rechts, 180 = links
 unsigned long sensorikVerzoegerung;          // Verzögerung für Schwenkung und Messung der Sensorik
 unsigned long gehirnVerzoegerung;
-unsigned long startTime;
+unsigned long bewegungAusweichenVerzoegerung; // Verzögerungsvariable für Ausweich-Funktion   // NEU!!!!!!!
+
 float sensorWert;                            // Momentaner Sensor-Wert
 float refSpannung = 4.96;                    // Korrektur für Sensor von 2A
 const float sensorMin = 512;                 // Sensor-Wert bei freiem Feld
 const float sensorMax = 2048;                // Gewünschter Maximalwert des Sensors
 
 void setup() {
-  // debugging output
   Serial.begin(9600);         /* DEV */
   
-  // benötigt für die library
   myservo.attach(servoPin);
   myservo.write(sensorikPosition);
 
@@ -38,17 +37,14 @@ void setup() {
     
   pinMode(ENA, OUTPUT);
 
-  // der Sensor ist sonst viel zu schnell
-  sensorikVerzoegerung = 10;
-  // nicht sicher ob es gebraucht wird
-  gehirnVerzoegerung = 10;
+  sensorikVerzoegerung = 0;
+  gehirnVerzoegerung = 0;
+  bewegungAusweichenVerzoegerung = 1000;               // NEU!!!!!!!
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   gehirn();
-  // hardcoded geschwindigkeitsanpassung
-  // die Variable definiert, wie schnell vorwärts gefahren wird
   analogWrite(ENA, geschwindigkeit);        /* DEV */
   analogWrite(ENB, geschwindigkeit);        /* DEV */  
   digitalWrite(N1, LOW);                    /* DEV */ 
@@ -63,7 +59,6 @@ void loop() {
 
 void sensorikInfrarot() {
   if (sensorikVerzoegerung < millis()) {  // Verzögerung für Schwenkung und Messung
-    // boolean, welcher die Richtung des sensors definiert
     if (sensorikRichtung) {               // 
       sensorikPosition++;        
     }
@@ -71,7 +66,6 @@ void sensorikInfrarot() {
       sensorikPosition--;
     }
     myservo.write(sensorikPosition);
-    // wenn über 180 Grad oder weniger als 0 Grad kehre Richtung um.
     if (sensorikPosition >= 180 || sensorikPosition <= 0) {
         sensorikRichtung = !sensorikRichtung;
     }
@@ -86,61 +80,31 @@ void sensorikInfrarot() {
 //  Bewegungsfunktionen:
 //  --------------------
 
-void bewegungFahrt(bool richtungFahrt, int dauer,byte geschwindigkeit) {          // richtungFahrt: geradeaus = true; rückwärts = false, dauer in Millisekunden
-  startTime=millis();
-  analogWrite(ENA, geschwindigkeit);        /* DEV */
-  analogWrite(ENB, geschwindigkeit);        /* DEV */ 
-  //// Vorwärts fahren
-  if (richtungFahrt) {               // 
-    if (millis() - startTime > dauer){
-      digitalWrite (N1, HIGH);
-      digitalWrite (N2, LOW);
-      digitalWrite (N3, HIGH);
-      digitalWrite (N4, LOW);    
-    }
-    // Rückwärts fahren
+void bewegungFahrt(byte richtungFahrt) {          // richtungFahrt: 0 = geradeaus, 1 = links, 2 = rechts
+  if (richtungFahrt == 0) {
+    analogWrite(ENA, geschwindigkeit);        /* DEV */
+    analogWrite(ENB, geschwindigkeit);        /* DEV */  
+    digitalWrite(N1, LOW);                    /* DEV */ 
+    digitalWrite (N2, HIGH);                  /* DEV */ 
+    digitalWrite (N3, HIGH);                  /* DEV */ 
+    digitalWrite (N4, LOW);                   /* DEV */ 
   }
-  else {
-    if (millis() - startTime > dauer){
-      digitalWrite (N1, LOW);
-      digitalWrite (N2, HIGH);
-      digitalWrite (N3, LOW);
-      digitalWrite (N4, HIGH);
-    }
+  else if (richtungFahrt == 1) {
+    analogWrite(ENA, geschwindigkeit);        /* DEV */
+    analogWrite(ENB, geschwindigkeit-20);     /* DEV */  
+    digitalWrite(N1, LOW);                    /* DEV */ 
+    digitalWrite (N2, HIGH);                  /* DEV */ 
+    digitalWrite (N3, HIGH);                  /* DEV */ 
+    digitalWrite (N4, LOW);                   /* DEV */ 
   }
-}
-
-void bewegungKurve(bool richtungKurve, int dauer,byte geschwindigkeit) {            // richtungKurve: links = true, rechts = false; dauer in Millisekunden
-  startTime=millis();
-  analogWrite(ENA, geschwindigkeit);        /* DEV */
-  analogWrite(ENB, geschwindigkeit);        /* DEV */ 
-  // Kurve links
-  if (richtungKurve) {               // 
-    if (millis() - startTime > dauer){
-      digitalWrite (N1, LOW);
-      digitalWrite (N2, HIGH);
-      digitalWrite (N3, HIGH);
-      digitalWrite (N4, LOW);    
-    }
-    // Kurve rechts
+  else { 
+    analogWrite(ENA, geschwindigkeit-20);      
+    analogWrite(ENB, geschwindigkeit);     
+    digitalWrite(N1, LOW);                  
+    digitalWrite (N2, HIGH);                 
+    digitalWrite (N3, HIGH);              
+    digitalWrite (N4, LOW);
   }
-  else {
-    if (millis() - startTime > dauer){
-      digitalWrite (N1, HIGH);
-      digitalWrite (N2, LOW);
-      digitalWrite (N3, LOW);
-      digitalWrite (N4, HIGH);  
-    }
-  }
-}
-
-void bewegungAntrieb(bool rad, bool drehrichtungAntrieb, byte geschwindigkeitAntrieb) {      // Subroutine - Grundlegender Antrieb eines Rads, rad: links = true, rechts = false; drehrichtungAntrieb: vorwärts = true, rückwärts = false; geschwindigkeitAntrieb in Prozent
-  
-}
-
-void bewegungAnfahrt() {
-  geschwindigkeit = 255;
-  delay(20);
 }
 
 //  Entscheidungsroutinen:
@@ -151,17 +115,20 @@ void gehirn() {
     int sensorInt = map(sensorWert, sensorMin, sensorMax, 0, 4);    
     switch (sensorInt) {
       case 0:
-        geschwindigkeit = 80;
+        geschwindigkeit = 255;
+        bewegungFahrt(0);
         break;
       case 1:
         geschwindigkeit = 40;
+        bewegungFahrt(1);
         break;
       case 2:
         geschwindigkeit = 20;
+        bewegungFahrt(1);
         break;      
       case 3:
-        // stop
         geschwindigkeit = 0;
+        bewegungFahrt(1);
         break; 
       default:
         break;  
