@@ -67,12 +67,16 @@ int  pos = 0;    // variable to store the servo position
 // ENA enable PMW for the motors
 //////////////////////////////////////////////////////////////
 #define ENA   11
+// both HIGH motor is off
+// N1 high and N2 low forwards
+// N1 low and N2 high backwards
 #define N1    12
 #define N2    13 // Port A4=18
 //////////////////////////////////////////////////////////////
 //Motor B rechts
 //////////////////////////////////////////////////////////////
 #define ENB   3
+// same as above
 #define N3    2
 #define N4    18
 //////////////////////////////////////////////////////////////
@@ -111,7 +115,7 @@ void setup()
   /////////////////////////////////////////////////////////////////////
   //SCREEN
   ////////////////////////////////////////////////////////////////////
- lcd.begin(16, 2);              // start the library
+ lcd.begin(16, 2);              // start the library 16 Zeichen 2 Zeilen
  lcd.setCursor(0,0);
  lcd.print("Push the buttons"); // print a simple message
  /////////////////////////////////////////////////////////////////////
@@ -148,6 +152,7 @@ void loop()
      {
      lcd.print("TASK 5");
      startTime = millis();
+     // so task is being executed repeatedly
      while (true){
       task5();
       }
@@ -159,6 +164,7 @@ void loop()
      analogWrite (ENA, 100); // Speed Control mit Werten von 0-255(=FullSpeed)
      analogWrite (ENB, 100);
      startTime = millis();
+     // so task is being executed repeatedly
      while (true){
       task2();
       }
@@ -170,6 +176,7 @@ void loop()
      {
      lcd.print("TASK 3");
      startTime = millis();
+     // so task is being executed repeatedly
      while (true){
       task3();
       };
@@ -179,6 +186,7 @@ void loop()
      {
      lcd.print("TASK 4");
      startTime = millis();
+     // so task is being executed repeatedly
      while (true){
       task4();
       }
@@ -281,6 +289,7 @@ void task2() {
         digitalWrite (N2, HIGH);
         digitalWrite (N3, HIGH);
         digitalWrite (N4, HIGH);
+        // stand still for 2 seconds
         delay(onTime2);
         startTime=millis();
        
@@ -352,6 +361,7 @@ void task2() {
 }
 
 // drives in a circle in predefined radius
+// this is a pain in the ass with our sensor
 void task3() { 
   // set one engine to fast and the other to slow
   analogWrite (ENA, 255); // Schnell
@@ -386,8 +396,11 @@ void task4() {
       }
       break;
     case 2:
-      // transition bit?
-      // same case as case 4? difference
+      // transition bit
+      // drive forward for some seconds
+      // trial and error
+      // rad hinten ist immer noch schräg obwohl Räder geradeaus fahren, darum ENA < ENB
+      // oder Motorgenauigkeit
       analogWrite (ENA, 80); // Speed Control mit Werten von 0-255(=FullSpeed)
       analogWrite (ENB, 100);
       digitalWrite (N1, HIGH);
@@ -475,6 +488,7 @@ void task5() {
       digitalWrite (N3, HIGH);
       digitalWrite (N4, LOW);
      
+     // after every second increase spirale1
      if (millis() - startTime > onTime1){
         spirale =spirale + 1;
         startTime=millis();
