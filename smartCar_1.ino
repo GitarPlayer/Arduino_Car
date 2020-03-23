@@ -97,6 +97,7 @@ void bewegungFahrt(bool richtungFahrt, int dauer) {          // richtungFahrt: g
       digitalWrite (N4, LOW);    
     }
     // Rückwärts fahren
+  }
   else {
     if (millis() - startTime > dauer){
       digitalWrite (N1, LOW);
@@ -118,6 +119,7 @@ void bewegungKurve(bool richtungKurve, int dauer) {            // richtungKurve:
       digitalWrite (N4, LOW);    
     }
     // Kurve rechts
+  }
   else {
     if (millis() - startTime > dauer){
       digitalWrite (N1, HIGH);
