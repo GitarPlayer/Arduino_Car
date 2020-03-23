@@ -204,20 +204,24 @@ void loop()
 
 }
 
+// task1 is to wait 2 seconds, drive forward for 1 second, wait again for 2 seconds, then drive backwards for 1 sec
 void task1() {  
   switch (phase) {
-
+    // first stand still for 2 seconds
     case 1:
       digitalWrite (N1, HIGH);
       digitalWrite (N2, HIGH);
       digitalWrite (N3, HIGH);
       digitalWrite (N4, HIGH);
      
+     // onTime2 is just 2 seconds like demanded in the excercise
      if (millis() - startTime > onTime2){
         startTime=millis();
         phase = 2;
       }
       break;
+    // drive forwards for 1 second
+    // onTime1 is 1 second
     case 2:
       digitalWrite (N1, HIGH);
       digitalWrite (N2, LOW);
@@ -230,7 +234,7 @@ void task1() {
       }
       break;
 
-     
+     // stand still for two seconds again
 
      case 3:
       digitalWrite (N1, HIGH);
@@ -244,6 +248,7 @@ void task1() {
       }
       break;
       
+      // now drive backwards for 1 second
       case 4:
 
         digitalWrite (N1, LOW);
@@ -259,6 +264,7 @@ void task1() {
   }
 }
 
+// drive forwards, stand still, turn right 90 degrees, drive forwards, stand still, turn left 90 degrees --> Repeat everything
 void task2() {  
   switch (phase) {
 
@@ -293,6 +299,7 @@ void task2() {
         digitalWrite (N2, HIGH);
         digitalWrite (N3, HIGH);
         digitalWrite (N4, HIGH);
+        // kurz stehen bleiben
         delay(onTime2);
         startTime=millis();
         
@@ -303,7 +310,7 @@ void task2() {
      
 
      case 3:
-
+      // geraude aus fahren
         digitalWrite (N1, HIGH);
         digitalWrite (N2, LOW);
         digitalWrite (N3, HIGH);
@@ -337,13 +344,16 @@ void task2() {
           delay(onTime2);
           startTime=millis();
           
+          // repeat everything
           phase = 1;
         }
         break;
   }
 }
 
+// drives in a circle in predefined radius
 void task3() { 
+  // set one engine to fast and the other to slow
   analogWrite (ENA, 255); // Schnell
   analogWrite (ENB, 100); // langsam
   digitalWrite (N1, HIGH); //-> Arduino dreht sich im Kreis
@@ -352,6 +362,7 @@ void task3() {
   digitalWrite (N4, LOW);
 }
 
+// snake curve 
 void task4() {  
   switch (phase) {
 
@@ -375,6 +386,8 @@ void task4() {
       }
       break;
     case 2:
+      // transition bit?
+      // same case as case 4? difference
       analogWrite (ENA, 80); // Speed Control mit Werten von 0-255(=FullSpeed)
       analogWrite (ENB, 100);
       digitalWrite (N1, HIGH);
@@ -417,6 +430,7 @@ void task4() {
       break;
       
       case 4:
+        // transition bit
         analogWrite (ENA, 80); // Speed Control mit Werten von 0-255(=FullSpeed)
         analogWrite (ENB, 100);
 
@@ -439,10 +453,14 @@ void task4() {
   }
 }
 
+// drive like a spirale
 void task5() {  
   switch (1) {
 
     case 1:
+      // spirale is a counter for enbgeschwindigkeit
+      // the bigger spirale the smaller enbgeschwindigkeit 
+      // the smaller ENB, speed, the less pronounced is the right turn --> Spirale
       if (spirale < 20){
         enbgeschwindigkeit = 100 - (spirale * 5);
       }
