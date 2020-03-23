@@ -18,9 +18,11 @@
 //Sample using LiquidCrystal library
 #include <LiquidCrystal.h>
 // select the pins used on the LCD panel
+// these pins are fixed in our case!
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 // define some values used by the panel and buttons
+// adc_key_in Spannungsverteiler analog Port, über den alle Buttons geführt sind.
 int lcd_key     = 0;
 int adc_key_in  = 0;
 #define btnRIGHT  0
@@ -56,12 +58,13 @@ int read_LCD_buttons()
 
 ///////////////////////////////////////////////////////////////
 #include <Servo.h>
-Servo myservo;  // create servo object to control a servo
+Servo myservo;  // create servo object to control a servo (Die Steuerung der Räder
 int  pos = 0;    // variable to store the servo position
 #define ServoPin 16 //servo on pin A2 (=16)
 //Define Pins
 //////////////////////////////////////////////////////////////
 //Motor A links
+// ENA enable PMW for the motors
 //////////////////////////////////////////////////////////////
 #define ENA   11
 #define N1    12
